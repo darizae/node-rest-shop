@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "start": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
     "lint-staged": "^15.0.2",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.3"
   },
   "husky": {
@@ -27,6 +29,9 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx}": ["eslint --fix", "prettier --write"]
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
