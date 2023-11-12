@@ -5,10 +5,33 @@ const mongoose = require("mongoose");
 const Product = require("../models/product")
 
 router.get("/", (req, res, next) => {
-    res.status(200).json({
-       message: "Handling GET requests to /products"
-    });
-})
+    Product.find()
+        .select('name price _id')  // This line is optional, it filters the properties to return
+        .exec()
+        .then(docs => {
+            const response = {
+                count: docs.length,
+                products: docs.map(doc => {
+                    return {
+                        name: doc.name,
+                        price: doc.price,
+                        _id: doc._id,
+                        request: {
+                            type: 'GET',
+                            url: 'http://localhost:3000/products/' + doc._id
+                        }
+                    }
+                })
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
 
 router.post("/", (req, res, next) => {
     const product = new Product({
@@ -54,15 +77,51 @@ router.get("/:productId", (req, res, next) => {
 });
 
 router.patch("/:productId", (req, res, next) => {
-    res.status(200).json({
-        message: "Updated product"
-    })
-})
+    const id = req.params.productId;
+    const updateOps = {};
+    for (const ops of req.body) {
+        updateOps[ops.propName] = ops.value;
+    }
+    Product.findByIdAndUpdate(id, { $set: updateOps })
+        .exec()
+        .then(result => {
+            console.log(result);
+            res.status(200).json({
+                message: "Product updated",
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/products/' + id
+                }
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
 
 router.delete("/:productId", (req, res, next) => {
-    res.status(200).json({
-        message: "Deleted product"
-    })
-})
+    const id = req.params.productId;
+    Product.findByIdAndDelete(id)
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                message: "Product deleted",
+                request: {
+                    type: 'POST',
+                    url: 'http://localhost:3000/products',
+                    body: { name: 'String', price: 'Number' }
+                }
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+});
 
 module.exports = router;
