@@ -43,10 +43,24 @@ router.post("/", (req, res, next) => {
     product
         .save()
         .then(result => {
-            console.log(result);
             res.status(201).json({
-                message: "Handling POST requests to /products",
-                createdProduct: result
+                message: "Product created successfully",
+                createdProduct: {
+                    name: result.name,
+                    price: result.price,
+                    _id: result._id,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:3000/products/' + result._id
+                    }
+                },
+                additionalActions: {
+                    createAnotherProduct: {
+                        type: 'POST',
+                        url: 'http://localhost:3000/products',
+                        body: { name: 'String', price: 'Number' }
+                    }
+                }
             });
         })
         .catch(err => {
@@ -85,12 +99,17 @@ router.patch("/:productId", (req, res, next) => {
     Product.findByIdAndUpdate(id, { $set: updateOps })
         .exec()
         .then(result => {
-            console.log(result);
             res.status(200).json({
                 message: "Product updated",
                 request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/products/' + id
+                    viewUpdatedProduct: {
+                        type: 'GET',
+                        url: 'http://localhost:3000/products/' + id
+                    },
+                    updateAgain: {
+                        type: 'PATCH',
+                        url: 'http://localhost:3000/products/' + id
+                    }
                 }
             });
         })
